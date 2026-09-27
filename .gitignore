@@ -1,0 +1,10 @@
+# Arquivos compilados
+/bin/
+*.class
+
+# Logs
+*.log
+
+# Arquivos do sistema operacional
+.DS_Store
+Thumbs.db
