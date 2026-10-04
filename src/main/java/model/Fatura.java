@@ -1,23 +1,55 @@
 package model;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
+// Representa uma fatura e coordena seus itens com as movimentações do estoque. //
 public class Fatura {
-    //--------------------Atributos--------------------//
+    // Atributos //
     
     private int codigo;
     private Cliente cliente;
-    private String dataEmissao;
+    private LocalDate dataEmissao;
     private ArrayList<ItemFatura> itens;
-    private double valorTotal;
+    private BigDecimal valorTotal;
     private Estoque estoque;
 
-    //------------------- Construtor ------------------//
+    // Métodos de acesso //
+
+    // Retorna o código identificador da fatura. //
+    public int getCodigo() {
+        return codigo;
+    }
+
+    // Retorna o cliente associado à fatura. //
+    public Cliente getCliente() {
+        return cliente;
+    }
+        
+    // Retorna a data de emissão informada para a fatura. //
+    public LocalDate getDataEmissao() {
+        return dataEmissao;
+    }
+
+    // Retorna o valor total atualizado dos itens da fatura. //
+    public BigDecimal getValorTotal() {
+        return valorTotal;
+    }
+
+    // Retorna uma visão imutável dos itens atualmente faturados. //
+    public List<ItemFatura> getItens() {
+        return List.copyOf(itens);
+    }
+
+    // Construtor //
     
+    // Cria uma fatura vazia vinculada ao cliente e ao estoque. //
     public Fatura(
         int codigo,
         Cliente cliente,
-        String dataEmissao,
+        LocalDate dataEmissao,
         Estoque estoque
     ) {
         this.codigo = codigo;
@@ -25,16 +57,16 @@ public class Fatura {
         this.dataEmissao = dataEmissao;
         this.estoque = estoque;
         this.itens = new ArrayList<>();
-        this.valorTotal = 0.0;
+        this.valorTotal = BigDecimal.ZERO;
     }
     
-    //--------------------- Métodos -------------------//
+    // Apresentação //
     
     private void recalcularValorTotal() {
-        valorTotal = 0.0;
+        valorTotal = BigDecimal.ZERO;
 
         for (ItemFatura item : itens) {
-            valorTotal += item.calcularSubtotal();
+            valorTotal = valorTotal.add(item.calcularSubtotal());
         }
     }
 
@@ -46,10 +78,14 @@ public class Fatura {
         return valor;
     }
 
+    // Exibe os dados do cliente, os itens e o valor total da fatura. //
     public void imprimirFatura() {
+        DateTimeFormatter formato = DateTimeFormatter.ofPattern("dd/MM/uuuu");
         System.out.println("========================================");
         System.out.printf("FATURA Nº %d%n", codigo);
-        System.out.printf("Data de emissão: %s%n", dataEmissao);
+        System.out.printf("Data de emissão: %s%n", 
+            dataEmissao.format(formato)
+        );
         System.out.println("========================================");
 
         System.out.println("DADOS DO CLIENTE");
@@ -102,8 +138,9 @@ public class Fatura {
         System.out.println("========================================");
     }
 
-    //--------------------- Getters -------------------//
+    // Consultas //
 
+    // Localiza a linha correspondente para agrupar o mesmo produto na fatura. //
     private ItemFatura buscarItem(Produto produto){
         for (ItemFatura item : itens){
             if (item.correspondeAo(produto)){
@@ -114,28 +151,9 @@ public class Fatura {
         return null;
     }
 
-    public int getCodigo() {
-        return codigo;
-    }
+    // Operações //
 
-    public Cliente getCliente() {
-        return cliente;
-    }
-        
-    public String getDataEmissao() {
-        return dataEmissao;
-    }
-
-    public double getValorTotal() {
-        return valorTotal;
-    }
-
-    public List<ItemFatura> getItens() {
-        return List.copyOf(itens);
-    }
-
-    //--------------------- Setters -------------------//
-
+    // Adiciona unidades à fatura e as retira do estoque. //
     public void adicionarProduto(
         Produto produto,
         int quantidade
@@ -153,6 +171,7 @@ public class Fatura {
         recalcularValorTotal();
     }
 
+    // Remove unidades da fatura, devolve-as ao estoque e atualiza o total. //
     public boolean removerProduto(
             Produto produto,
             int quantidade

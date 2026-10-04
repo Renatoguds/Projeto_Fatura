@@ -1,11 +1,13 @@
 package model;
+// Representa um CNPJ validado e armazenado sem pontuação. //
 public final class Cnpj {
 
-    //--------------------Atributos--------------------//
+    // Atributos //
 
     private static final int TAMANHO = 14;
     private final String numero;
 
+    // Pesos usados no cálculo dos dois dígitos verificadores do CNPJ. //
     private static final int[] PESOS_PRIMEIRO_DIGITO = {
         5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2
     };
@@ -14,8 +16,16 @@ public final class Cnpj {
         6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2
     };
 
-    //--------------------Construtor-------------------//
+    // Métodos de acesso //
 
+    // Retorna os 14 dígitos do CNPJ, sem pontuação. //
+    public String getNumero() {
+        return numero;
+    }
+
+    // Construtor //
+
+    // Cria um CNPJ normalizado e valida formato e dígitos verificadores. //
     public Cnpj(String valor) {
         validarPreenchimento(valor);
         validarFormato(valor);
@@ -27,7 +37,7 @@ public final class Cnpj {
         this.numero = numeroSemFormatacao;
     }
 
-    //---------------------Validações------------------//
+    // Validações //
 
     private void validarPreenchimento(String valor) {
         if (valor == null || valor.isBlank()) {
@@ -126,12 +136,9 @@ public final class Cnpj {
         return 11 - resto;
     }
 
-    //----------------Métodos públicos-----------------//
+    // Representação e igualdade //
 
-    public String getNumero() {
-        return numero;
-    }
-
+    // Retorna o CNPJ no formato 00.000.000/0000-00. //
     public String formatado() {
         return String.format(
             "%s.%s.%s/%s-%s",

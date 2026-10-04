@@ -1,225 +1,136 @@
 # Sistema de Faturas e Controle de Estoque
 
-Aplicação Java via terminal para cadastrar produtos, controlar quantidades em estoque e compor faturas associadas a um cliente. O projeto nasceu de uma atividade acadêmica de Programação Orientada a Objetos e está evoluindo como parte de um portfólio de desenvolvimento.
+Aplicação de terminal desenvolvida em Java para cadastrar produtos, controlar o estoque e compor faturas associadas a um cliente. O projeto começou como atividade acadêmica de Programação Orientada a Objetos e está sendo desenvolvido também como peça de portfólio.
 
-O foco é aplicar modelagem de domínio, encapsulamento, validações e testes automatizados em um fluxo comercial simples, documentando as decisões e a evolução da solução.
+O foco é aplicar conceitos de orientação a objetos, separação de responsabilidades, validação de regras de negócio, testes automatizados e persistência de dados, evoluindo o sistema em etapas pequenas e verificáveis.
 
-**Status:** aplicação funcional em memória, com menus de estoque e fatura. A próxima entrega planejada é a persistência dos cadastros dinâmicos de clientes e estoque em JSON.
+> A aplicação simula operações comerciais para fins de estudo. Não emite documentos fiscais oficiais.
 
-> A aplicação simula faturas comerciais para fins de estudo. Não realiza emissão de documentos fiscais oficiais.
+## Funcionalidades
 
-## Funcionalidades atuais
-
-- Cadastro de produtos com código sequencial, nome, NCM, valor e quantidade.
-- Confirmação dos dados antes da inclusão de um novo produto.
-- Reposição de produtos existentes pelo nome, desconsiderando diferenças entre maiúsculas e minúsculas.
-- Listagem do estoque e resumo de produtos distintos e unidades disponíveis.
-- Composição de fatura com seleção de produtos por código e quantidade.
-- Agrupamento do mesmo produto em um único item da fatura.
-- Retirada do estoque ao adicionar itens à fatura.
-- Remoção parcial ou total da quantidade de um item, com devolução ao estoque.
+- Cadastro e consulta de produtos em memória, com código sequencial, nome, marca, NCM, valor e quantidade.
+- Identificação de produtos pelo par nome e marca, ignorando diferenças entre maiúsculas e minúsculas.
+- Reposição de produtos existentes e consulta do resumo do estoque.
+- Composição de faturas com seleção de produtos por código e quantidade.
+- Agrupamento de linhas referentes ao mesmo produto na fatura.
+- Retirada do estoque ao adicionar itens à fatura e devolução ao remover quantidades.
 - Cálculo de subtotais e do valor total da fatura.
-- Impressão no terminal com dados do cliente, produtos, quantidades e valores.
-- Validação e formatação de CNPJ numérico, incluindo dígitos verificadores.
-- Validação de razão social obrigatória e exigência de pelo menos um contato.
-- Testes automatizados com JUnit.
+- Impressão da fatura no terminal com os dados do cliente, produtos e valores.
+- Validação e formatação de CNPJ, razão social e contato do cliente.
+- Persistência do estoque em JSON: os dados são carregados na inicialização e salvos ao sair dos menus de estoque e fatura.
+- Testes automatizados para regras de domínio e gravação/leitura da persistência.
 
-A validação de CNPJ é local e matemática; não consulta a existência ou a situação cadastral da empresa.
+A persistência atual cobre o estoque. O cliente e a fatura de demonstração ainda são criados em memória; faturas não são armazenadas como histórico. A validação de CNPJ é local e matemática, sem consulta à situação cadastral da empresa.
 
 ## Tecnologias e requisitos
 
 | Tecnologia | Uso |
-|---|---|
-| Java / JDK 25 | Referência de ambiente para compilação e execução |
-| Java Collections | Armazenamento de produtos e itens em memória |
-| JUnit Jupiter | Testes automatizados |
-| JUnit Platform Console Standalone 1.14.2 | Biblioteca disponível em `lib` para compilar e executar testes |
+| --- | --- |
+| Java / JDK 25 | Compilação e execução |
+| Maven | Gerenciamento de dependências e execução dos testes |
+| Gson 2.14.0 | Conversão dos DTOs do estoque para JSON e de volta |
+| JUnit Jupiter 5.14.2 | Testes automatizados |
 | Git e GitHub | Versionamento e apresentação do projeto |
-| VS Code | Editor opcional, com configurações incluídas no repositório |
+| VS Code | Editor recomendado, com configurações do workspace incluídas |
 
-O projeto ainda não utiliza Maven ou Gradle. Os comandos abaixo consideram Windows com PowerShell, JDK disponível no `PATH` e arquivos salvos em UTF-8. A limpeza de tela utiliza sequências ANSI; prefira um terminal compatível.
-
-## Como executar
-
-Clone ou baixe o repositório e abra um terminal na pasta `Projeto_Fatura`, onde estão `src` e `lib`.
-
-Confira o JDK:
+É necessário ter um JDK compatível com Java 25 e Maven instalado e disponível no terminal. Confira as instalações com:
 
 ```powershell
 java -version
-javac -version
+mvn -version
 ```
 
-Compile a aplicação:
+## Como executar
+
+Clone ou baixe o repositório e abra sua pasta raiz no VS Code. Use a extensão Java para executar `Main.java` pelo comando **Run Java** ou pelo botão **Run** do editor.
+
+O Maven compila as classes e executa os testes com:
 
 ```powershell
-javac -encoding UTF-8 -d bin src/model/*.java src/ui/*.java src/Main.java
+mvn clean test
 ```
 
-Execute:
+## Persistência do estoque
+
+Na inicialização, o sistema procura o arquivo `data/estoque.json`. Se o arquivo ainda não existir, começa com um estoque vazio. Ao sair dos menus de estoque e de fatura, grava o estado atual, incluindo os produtos, suas marcas, quantidades e o próximo código disponível.
+
+A pasta `data/` e seus arquivos são gerados durante a execução e ficam fora do versionamento pelo `.gitignore`. Para conferir a persistência manualmente, cadastre um produto, saia normalmente do menu e execute o sistema outra vez; o produto deverá ser carregado do arquivo.
+
+## Testes
+
+Os testes ficam em `src/test/java`. A suíte cobre regras do modelo e o ciclo de gravação e leitura do estoque JSON. Execute todos os testes a partir da raiz do projeto:
 
 ```powershell
-java -cp bin Main
+mvn clean test
 ```
-
-No VS Code, abra a pasta raiz do projeto, utilize as extensões de Java e execute o método `main` de `src/Main.java` no terminal integrado.
-
-### Fluxo de uso
-
-1. No menu de estoque, cadastre um produto e confirme os dados.
-2. Consulte a listagem ou o resumo do estoque.
-3. Escolha `0 - Voltar` para sair do menu de estoque e avançar ao menu da fatura.
-4. Adicione produtos à fatura informando código e quantidade.
-5. Visualize a fatura ou remova quantidades dos itens.
-6. Escolha `0 - Voltar` no menu da fatura para encerrar a execução atual.
-
-No fluxo atual, `Main` cria um cliente de demonstração e uma fatura com código e data fixos. Ainda não há menu de cadastro de clientes ou gerenciamento de múltiplas faturas.
-
-### Exemplo de operação
-
-Exemplo ilustrativo das regras implementadas:
-
-| Operação | Saldo em estoque | Quantidade na fatura | Total da fatura |
-|---|---:|---:|---:|
-| Cadastrar 5 unidades a R$ 8,00 | 5 | 0 | R$ 0,00 |
-| Adicionar 3 unidades à fatura | 2 | 3 | R$ 24,00 |
-| Remover 1 unidade da fatura | 3 | 2 | R$ 16,00 |
-
-## Testes automatizados
-
-A suíte atual está em `src/TestesSistema.java` e contém 14 testes. Os cenários abrangem validação de cliente e CNPJ, valor de produto, agrupamento, geração de códigos, retirada e devolução ao estoque, remoção parcial e cópias de produtos.
-
-Compile aplicação e testes:
-
-```powershell
-javac -encoding UTF-8 -cp "lib/*" -d bin src/model/*.java src/ui/*.java src/Main.java src/TestesSistema.java
-```
-
-Execute a classe de testes:
-
-```powershell
-java -jar lib/junit-platform-console-standalone-1.14.2.jar execute --class-path bin --select-class TestesSistema
-```
-
-A seleção explícita de `TestesSistema` evita depender das convenções de nome usadas pela descoberta automática. A suíte cobre os cenários existentes, mas ainda precisa de novos casos para saldo zero, persistência e integridade histórica.
 
 ## Organização do projeto
 
 ```text
 Projeto_Fatura/
 ├── .vscode/
-│   ├── launch.json
-│   └── settings.json
-├── lib/
-│   └── junit-platform-console-standalone-1.14.2.jar
+├── data/                         # dados JSON gerados localmente; ignorados pelo Git
 ├── src/
-│   ├── model/
-│   │   ├── Cliente.java
-│   │   ├── Cnpj.java
-│   │   ├── Estoque.java
-│   │   ├── Fatura.java
-│   │   ├── ItemFatura.java
-│   │   └── Produto.java
-│   ├── ui/
-│   │   ├── EstoqueMenu.java
-│   │   ├── FaturaMenu.java
-│   │   └── Terminal.java
-│   ├── Main.java
-│   └── TestesSistema.java
+│   ├── main/java/
+│   │   ├── model/                # Cliente, Cnpj, Estoque, Fatura, ItemFatura, Produto
+│   │   ├── persistence/          # implementação JSON do estoque
+│   │   │   └── dto/              # objetos de transferência para o JSON
+│   │   ├── repository/           # estrutura em evolução
+│   │   ├── ui/                   # menus e operações de terminal
+│   │   └── Main.java
+│   └── test/java/                # testes JUnit
+├── pom.xml
 ├── .gitignore
 └── README.md
 ```
 
-A pasta `bin` é gerada pela compilação e deve permanecer fora do versionamento.
-
-### Responsabilidades e decisões
-
-- **`model`:** representa os dados e concentra as regras de cliente, produto, estoque e fatura.
-- **`ui`:** recebe entradas e apresenta os menus no terminal.
-- **`Main`:** cria os objetos iniciais e coordena a sequência dos menus.
-- **`Cnpj`:** objeto de valor imutável com validação, formatação e comparação por conteúdo.
-- **`ItemFatura`:** representa o produto e a quantidade da operação, calculando seu subtotal.
-- **`Estoque`:** atribui códigos e controla as quantidades; consultas retornam cópias dos produtos.
-
-A separação de responsabilidades está em evolução: atualmente, `Fatura` também imprime dados e coordena movimentações do estoque. SOLID e Object Calisthenics são referências para revisão e aprendizado, sem pressupor adesão integral no estado atual.
+- **`model`:** representa os conceitos do sistema e concentra regras de domínio e validações.
+- **`ui`:** recebe entradas e apresenta informações no terminal.
+- **`persistence`:** converte o estado do estoque para DTOs e usa Gson para salvar e carregar JSON.
+- **`persistence.dto`:** contém os dados usados na transferência entre o modelo e o arquivo.
+- **`Main`:** carrega o estoque antes de abrir os menus e solicita a gravação ao sair deles.
+- **`repository`:** área em evolução para separar contratos de repositório da implementação de armazenamento.
 
 ## Limitações atuais
 
-- Os dados existem somente durante a execução; não há persistência em arquivo ou banco.
-- O CRUD de clientes e produtos ainda não está completo.
-- Valores monetários usam `double`, e a data da fatura usa `String`.
-- Faturas continuam mutáveis e não possuem etapas formais de emissão e cancelamento ou histórico auditável.
-- A lista retornada por `Fatura.getItens()` não permite alterações estruturais, mas seus itens continuam mutáveis.
-- O formato de e-mail, celular e NCM ainda não recebe validação específica.
-- **Saldo zero:** a retirada pode zerar o produto, mas `criarCopia()` passa pelo construtor que exige quantidade positiva. Consultas posteriores podem falhar; esse caso precisa ser corrigido antes da persistência do estoque.
+- Somente o estoque é persistido; clientes e faturas ainda não são mantidos entre execuções.
+- O cliente e a fatura usados na demonstração são fixos.
+- O CRUD de produtos e clientes ainda não está completo.
+- A fatura permanece mutável e não tem ciclo formal de emissão, cancelamento ou histórico auditável.
+- Valores monetários são representados com `BigDecimal`, e a data da fatura com `LocalDate`.
+- Validações específicas de e-mail, celular e NCM ainda podem ser ampliadas.
+- O projeto ainda precisa definir recuperação para arquivos JSON inválidos e tornar a escrita mais resistente a interrupções.
 
 ## Próximas etapas
 
-Os itens abaixo são propostas de evolução, ainda não implementadas. A prioridade combina três ajustes pequenos com a próxima entrega funcional: persistência dinâmica em JSON.
+A implementação continua de forma incremental, com testes a cada etapa.
 
-### Prioridade — três melhorias de aplicação simples
+### Persistência e cadastros
 
-- [ ] **Corrigir a normalização de campos opcionais de `Cliente`:** armazenar o resultado de `normalizarCampoOpcional()` em `setEndereco()` e `setInscricaoEstadual()`, mantendo o mesmo comportamento do construtor.
-- [ ] **Remover a validação duplicada de contato:** manter uma única validação no caminho de inicialização, pois `definirContato()` já verifica e-mail e celular.
-- [ ] **Padronizar nomes e formatação:** substituir `scan` por `scanner` e ajustar a indentação dos menus, sem alterar as regras de negócio.
+- [ ] Persistir clientes em JSON e carregar os cadastros na inicialização.
+- [ ] Concluir o CRUD de clientes e produtos, tratando nomes e marcas duplicados e definindo as regras de identificação dos registros.
+- [ ] Implementar a exclusão definitiva de um produto e renumerar os códigos dos produtos posteriores, atualizando as referências relacionadas para preservar a integridade.
+- [ ] Adicionar testes para arquivo inexistente, JSON inválido, falhas de leitura/gravação e restauração dos códigos.
+- [ ] Avaliar escrita temporária e substituição segura do arquivo para reduzir o risco de dados incompletos.
+- [ ] Separar os contratos de repositório das implementações concretas e manter os menus independentes do formato de armazenamento.
 
-### Prioridade — próxima entrega: persistência dinâmica em JSON
-
-Salvar e restaurar o estado atual de clientes e estoque será o próximo foco de desenvolvimento. A persistência de faturas históricas e dos eventos de auditoria ficará para uma etapa posterior.
-
-- [ ] Corrigir a representação de saldo zero, distinguindo saldo válido de quantidade positiva exigida em uma movimentação, e adicionar um teste de regressão.
-- [ ] Criar uma coleção de clientes identificáveis, substituindo progressivamente o cliente fixo de demonstração.
-- [ ] Definir arquivos modulares, como `dados/clientes.json` e `dados/estoque.json`, e uma versão para seu formato.
-- [ ] Criar uma camada de persistência separada das entidades e dos menus; escolher e configurar uma biblioteca JSON.
-- [ ] Carregar os cadastros na inicialização e definir a gravação das alterações confirmadas.
-- [ ] Preservar códigos, saldos e a sequência de identificação dos produtos ao reabrir o sistema.
-- [ ] Tratar primeiro uso sem arquivo, conteúdo inválido e falha de gravação sem substituir silenciosamente dados existentes.
-- [ ] Usar escrita temporária e substituição segura para reduzir o risco de arquivos incompletos.
-- [ ] Testar gravação, leitura e restauração após reiniciar, incluindo estoque zerado e preservação dos identificadores.
-- [ ] Manter dados reais de execução fora do Git e fornecer exemplos fictícios quando necessário.
-
-Persistência e CRUD serão desenvolvidos de forma incremental. A primeira entrega não precisa aguardar a implementação de todo o histórico de transações.
-
-### Evolução funcional e arquitetural
-
-- [ ] Completar o CRUD de clientes e produtos, incluindo desativação de registros necessários ao histórico.
-- [ ] Separar cadastro de produto e movimentação de estoque, com operações explícitas de entrada, saída e ajuste.
-- [ ] Migrar datas para `LocalDate` e valores monetários para `BigDecimal`.
-- [ ] Reforçar validações de contato, NCM e identidade das entidades; avaliar suporte a CNPJ alfanumérico.
-- [ ] Restringir alterações externas em itens e produtos que possam invalidar os totais ou saldos.
-- [ ] Separar impressão de faturas e coordenação das operações de negócio.
-- [ ] Adotar Maven ou Gradle e organizar os testes por responsabilidade.
-- [ ] Automatizar a execução dos testes com GitHub Actions.
-- [ ] Introduzir interfaces de repositório para permitir persistência JSON e, posteriormente, banco de dados sem espalhar decisões de armazenamento pelas entidades.
-- [ ] Avaliar e aplicar um design pattern GoF quando houver um problema concreto de extensão; registrar a justificativa, os benefícios e os custos. Repository é uma opção de organização da persistência, mas não pertence ao catálogo GoF.
-
-### Histórico de faturas e auditoria
-
-A direção planejada é manter **cadastros dinâmicos para o estado atual** e **registros históricos para as transações anteriores**.
+### Faturas e auditoria
 
 - [ ] Definir o ciclo de vida da fatura: elaboração, emissão e cancelamento.
-- [ ] Permitir alterações durante a elaboração e preservar o conteúdo após a emissão.
-- [ ] Guardar snapshots dos dados do cliente e dos produtos usados na transação, incluindo preços, quantidades e totais.
-- [ ] Persistir faturas emitidas para consulta histórica, sem depender dos valores atuais dos cadastros.
-- [ ] Registrar cancelamentos com motivo e eventual movimentação compensatória de estoque, preservando o documento original.
-- [ ] Manter logs de alterações em clientes, produtos e estoque separados dos arquivos que representam o estado atual.
-- [ ] Registrar identificador, data e hora, operação, registro afetado, motivo e valores anteriores e novos quando pertinentes; incluir responsável quando houver identificação de usuários.
-- [ ] Vincular eventos de auditoria às faturas e movimentações correspondentes.
-- [ ] Definir recuperação de falhas entre gravação do estado e do histórico, evitando alterações sem o respectivo evento.
+- [ ] Armazenar faturas emitidas como registros históricos imutáveis, com cópias dos dados de cliente e produto usados na operação.
+- [ ] Registrar alterações de clientes e estoque em logs de auditoria separados dos arquivos que representam o estado atual.
+- [ ] Registrar operação, data/hora, registro afetado, motivo e valores anteriores e novos quando aplicável.
 
-Essa proposta não exige Event Sourcing. O histórico complementará os cadastros; um arquivo de log editável, isoladamente, não garante proteção contra adulteração.
+### Evolução técnica
 
-### Persistência em banco de dados
+- [ ] Ampliar validações e restringir alterações que possam invalidar saldos e totais.
+- [ ] Separar a apresentação da fatura das regras de negócio.
+- [ ] Automatizar testes no GitHub Actions.
+- [ ] Avaliar persistência em banco de dados como alternativa posterior ao JSON.
+- [ ] Aplicar um padrão GoF quando houver um problema concreto que justifique sua complexidade, documentando benefícios e custos.
 
-- [ ] Modelar clientes, produtos, saldos, movimentações, faturas, itens e eventos de auditoria.
-- [ ] Implementar uma alternativa relacional à persistência JSON, com banco a definir.
-- [ ] Usar integridade referencial e transações para manter operações relacionadas consistentes.
-- [ ] Planejar migrações de estrutura, importação dos dados JSON e testes de integração.
-
-JSON será a primeira implementação. Banco de dados será uma evolução posterior, sem compromisso inicial de gravar simultaneamente nas duas opções.
+O histórico de faturas e os logs de auditoria são uma evolução planejada; não implicam Event Sourcing. O Repository é uma opção arquitetural para organizar o acesso aos dados, mas não faz parte do catálogo GoF.
 
 ## Contexto acadêmico e portfólio
 
-O projeto parte de um exercício de modelagem de cliente, produto e fatura e amplia o escopo com controle de estoque, menus e testes. A evolução busca demonstrar raciocínio sobre regras de negócio, manutenção de código e integridade dos dados.
-
-Os estudos de orientação a objetos, padrões GoF e Git/GitHub acompanham o desenvolvimento. O plano pessoal de estudos é mantido separado deste README; aqui, o foco é o funcionamento do projeto e suas próximas entregas.
+O sistema parte de um exercício de modelagem de cliente, produto e fatura e evolui com controle de estoque, menus, testes e persistência. O README registra o comportamento atual e as próximas entregas; o plano pessoal de estudos de orientação a objetos, padrões GoF e Git/GitHub é mantido separadamente.

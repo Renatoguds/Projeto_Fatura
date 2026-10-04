@@ -1,8 +1,13 @@
 import model.*;
 
 import static org.junit.jupiter.api.Assertions.*;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+
 import org.junit.jupiter.api.Test;
 
+// Verifica as regras atuais de cliente, produto, estoque e fatura. //
 public class TestesSistema {
 
     @Test
@@ -13,7 +18,8 @@ public class TestesSistema {
                 1,
                 "Produto inválido",
                 "12345678",
-                0,
+                "nada a ver",
+                BigDecimal.ZERO,
                 1
             )
         );
@@ -26,14 +32,16 @@ public class TestesSistema {
         estoque.cadastrarProduto(
             "Coca-Cola",
             "22021000",
-            8.00,
+            "Coca-Cola_company",
+            new BigDecimal("8"),
             5
         );
 
         estoque.cadastrarProduto(
             "coca-cola",
             "22021000",
-            8.00,
+            "Coca-Cola_company",
+            new BigDecimal("8"),
             3
         );
 
@@ -57,7 +65,7 @@ public class TestesSistema {
         fatura.adicionarProduto(produto, 3);
 
         assertEquals(2, estoque.getQuantidadeTotalEmEstoque());
-        assertEquals(24.00, fatura.getValorTotal(), 0.001);
+        assertEquals(0, new BigDecimal("24").compareTo(fatura.getValorTotal()));
         assertEquals(1, fatura.getItens().size());
     }
 
@@ -71,7 +79,7 @@ public class TestesSistema {
         fatura.removerProduto(produto, 3);
 
         assertEquals(5, estoque.getQuantidadeTotalEmEstoque());
-        assertEquals(0.0, fatura.getValorTotal(), 0.001);
+        assertEquals(0, new BigDecimal("0").compareTo(fatura.getValorTotal()));
         assertTrue(fatura.getItens().isEmpty());
     }
 
@@ -90,13 +98,15 @@ public class TestesSistema {
         assertTrue(fatura.getItens().isEmpty());
     }
 
+    // Dados de apoio compartilhados mantêm os cenários de teste mais concisos. //
     private Estoque criarEstoque() {
         Estoque estoque = new Estoque();
 
         estoque.cadastrarProduto(
             "Coca-Cola",
             "22021000",
-            8.00,
+            "Coca-Cola_company",
+            new BigDecimal("8"),
             5
         );
 
@@ -116,7 +126,7 @@ public class TestesSistema {
         return new Fatura(
             1,
             cliente,
-            "25/09/2026",
+            LocalDate.of(2026, 9, 25),
             estoque
         );
     }
@@ -174,15 +184,15 @@ public class TestesSistema {
         Estoque estoque = new Estoque();
 
         estoque.cadastrarProduto(
-            "Coca-Cola", "22021000", 8.00, 5
+            "Coca-Cola", "22021000", "Coca-Cola_company", new BigDecimal("8"), 5
         );
 
         estoque.cadastrarProduto(
-            "coca-cola", "22021000", 8.00, 3
+            "coca-cola", "22021000", "Coca-Cola_company", new BigDecimal("8"), 3
         );
 
         estoque.cadastrarProduto(
-            "Guaraná", "22021000", 7.00, 10
+            "Guaraná", "22021000", "Coca-Cola_company", new BigDecimal("7"), 10
         );
 
         Produto cocaCola = estoque.getProdutos().get(0);
@@ -205,7 +215,7 @@ public class TestesSistema {
 
         assertEquals(1, fatura.getItens().size());
         assertEquals(3, fatura.getItens().get(0).getQuantidade());
-        assertEquals(24.00, fatura.getValorTotal(), 0.001);
+        assertEquals(0, new BigDecimal("24").compareTo(fatura.getValorTotal()));
         assertEquals(2, estoque.getQuantidadeTotalEmEstoque());
     }
 
@@ -223,7 +233,7 @@ public class TestesSistema {
         assertTrue(removido);
         assertEquals(1, fatura.getItens().size());
         assertEquals(2, fatura.getItens().get(0).getQuantidade());
-        assertEquals(16.00, fatura.getValorTotal(), 0.001);
+        assertEquals(0, new BigDecimal("16.00").compareTo(fatura.getValorTotal()));
         assertEquals(3, estoque.getQuantidadeTotalEmEstoque());
     }
 
@@ -255,5 +265,97 @@ public class TestesSistema {
             estoque.getProdutos().get(0);
 
         assertEquals(5, produtoReal.getQuantidade());
+    }
+
+    @Test
+    void devePermitirConsultarProdutoComEstoqueZerado() {
+        Estoque estoque = criarEstoque();
+        Produto produto = estoque.getProdutos().get(0);
+        Fatura fatura = criarFatura(estoque);
+
+        fatura.adicionarProduto(produto, 5);
+
+        Produto produtoConsultado =
+            estoque.buscarProdutoPorCodigo(produto.getCodigo());
+
+        assertEquals(0, produtoConsultado.getQuantidade());
+        assertEquals(0, estoque.getQuantidadeTotalEmEstoque());
+        assertEquals(1, estoque.getProdutos().size());
+        assertEquals(0, estoque.getProdutos().get(0).getQuantidade());
+        assertEquals(0, new BigDecimal("40.00").compareTo(fatura.getValorTotal()));
+    }
+
+    @Test
+    void devePermitirReporProdutoComEstoqueZerado() {
+        Estoque estoque = criarEstoque();
+        Produto produto = estoque.getProdutos().get(0);
+        Fatura fatura = criarFatura(estoque);
+
+        fatura.adicionarProduto(produto, 5);
+
+        estoque.adicionarQuantidade(produto.getNome(), produto.getMarca(), 3);
+
+        Produto produtoAtualizado =
+            estoque.buscarProdutoPorCodigo(produto.getCodigo());
+
+        assertEquals(3, produtoAtualizado.getQuantidade());
+        assertEquals(3, estoque.getQuantidadeTotalEmEstoque());
+        assertEquals(1, estoque.getQuantidadeDeProdutosDiferentes());
+
+        assertEquals(5, fatura.getItens().get(0).getQuantidade());
+        assertEquals(0, new BigDecimal("40.00").compareTo(fatura.getValorTotal()));
+    }
+
+    @Test
+    void deveRejeitarSaldoInicialNegativo() {
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> new Produto(
+                1, "Produto de teste", "12345678", "Coca-Cola_company", new BigDecimal("8"), -1
+            )
+        );
+    }
+
+    @Test
+    void deveRejeitarSaldoNegativoSemAlterarSaldoAtual() {
+        Produto produto = new Produto(
+            1, "Produto de teste", "12345678", "Coca-Cola_company", new BigDecimal("8"), 5
+        );
+
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> produto.setQuantidade(-1)
+        );
+
+        assertEquals(5, produto.getQuantidade());
+    }
+
+    @Test
+    void deveRejeitarMovimentacoesComQuantidadeInvalida() {
+        Produto produto = new Produto(
+            1, "Produto de teste", "12345678", "Coca-Cola_company", new BigDecimal("8"), 5
+        );
+
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> produto.adicionarQuantidade(0)
+        );
+
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> produto.adicionarQuantidade(-1)
+        );
+
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> produto.removerQuantidade(0)
+        );
+
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> produto.removerQuantidade(-1)
+        );
+
+        assertEquals(5, produto.getQuantidade());
     }
 }

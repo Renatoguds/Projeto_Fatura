@@ -7,22 +7,27 @@ import model.Fatura;
 import model.ItemFatura;
 import model.Produto;
 
+// Apresenta no terminal as ações de composição e consulta da fatura. //
 public class FaturaMenu {
 
     private final Fatura fatura;
     private final Estoque estoque;
-    private final Scanner scan;
+    private final Scanner scanner;
 
+    // Prepara o menu com a fatura, o estoque e o leitor de entrada. //
     public FaturaMenu(
             Fatura fatura,
             Estoque estoque,
-            Scanner scan
+            Scanner scanner
     ) {
         this.fatura = fatura;
         this.estoque = estoque;
-        this.scan = scan;
+        this.scanner = scanner;
     }
 
+    // Fluxo do menu //
+
+    // Mantém o menu da fatura ativo até o usuário escolher voltar. //
     public void executar() {
         boolean continuar = true;
 
@@ -30,7 +35,7 @@ public class FaturaMenu {
             Terminal.limpar();
             exibirOpcoes();
 
-            String opcao = scan.nextLine();
+            String opcao = scanner.nextLine();
 
             switch (opcao) {
                 case "1":
@@ -56,7 +61,7 @@ public class FaturaMenu {
 
                 default:
                     System.out.println("Opção inválida.");
-                    Terminal.pausar(scan);
+                    Terminal.pausar(scanner);
             }
         }
     }
@@ -71,6 +76,8 @@ public class FaturaMenu {
         System.out.print("Escolha uma opção: ");
     }
 
+    // Ações do usuário //
+
     private void listarProdutosDisponiveis() {
         Terminal.limpar();
 
@@ -79,9 +86,10 @@ public class FaturaMenu {
 
         imprimirProdutosDisponiveis();
 
-        Terminal.pausar(scan);
+        Terminal.pausar(scanner);
     }
 
+    // Lê os dados e solicita a inclusão de um produto na fatura. //
     private void adicionarProduto() {
         Terminal.limpar();
 
@@ -95,13 +103,13 @@ public class FaturaMenu {
             System.out.print("Código do produto: ");
 
             int codigo = Integer.parseInt(
-                scan.nextLine()
+                scanner.nextLine()
             );
 
             System.out.print("Quantidade desejada: ");
 
             int quantidade = Integer.parseInt(
-                scan.nextLine()
+                scanner.nextLine()
             );
 
             Produto produto =
@@ -129,9 +137,10 @@ public class FaturaMenu {
             );
         }
 
-        Terminal.pausar(scan);
+        Terminal.pausar(scanner);
     }
 
+    // Lê os dados e solicita a remoção de um produto da fatura. //
     private void removerProduto() {
         Terminal.limpar();
 
@@ -144,7 +153,7 @@ public class FaturaMenu {
                     "\nA fatura não possui produtos."
                 );
 
-                Terminal.pausar(scan);
+                Terminal.pausar(scanner);
                 return;
             }
 
@@ -154,13 +163,13 @@ public class FaturaMenu {
             System.out.print("Código do produto: ");
 
             int codigo = Integer.parseInt(
-                scan.nextLine()
+                scanner.nextLine()
             );
 
             System.out.print("Quantidade a remover: ");
 
             int quantidade = Integer.parseInt(
-                scan.nextLine()
+                scanner.nextLine()
             );
 
             Produto produto =
@@ -195,8 +204,10 @@ public class FaturaMenu {
             );
         }
 
-        Terminal.pausar(scan);
+        Terminal.pausar(scanner);
     }
+
+    // Apresentação //
 
     private void imprimirProdutosDisponiveis() {
         List<Produto> produtos = estoque.getProdutos();
@@ -266,9 +277,10 @@ public class FaturaMenu {
         }
     }
 
+    // Mostra a fatura completa e aguarda o retorno do usuário. //
     private void visualizarFatura() {
         Terminal.limpar();
         fatura.imprimirFatura();
-        Terminal.pausar(scan);
+        Terminal.pausar(scanner);
     }
 }

@@ -8,3 +8,9 @@
 # Arquivos do sistema operacional
 .DS_Store
 Thumbs.db
+
+# Saída do Maven
+/target/
+
+# Persistencia de dados
+/data/
