@@ -1,11 +1,6 @@
 package persistence;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
+import module java.base;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -40,17 +35,33 @@ public class RepositorioEstoqueJson {
 
         String json = gson.toJson(dados);
 
-        Path pastaDados = caminhoArquivo.getParent();
+        Path caminhoAbsoluto = caminhoArquivo.toAbsolutePath();
+        Path pastaDados = caminhoAbsoluto.getParent();
 
-        if (pastaDados != null) {
-            Files.createDirectories(pastaDados);
-        }
+        Files.createDirectories(pastaDados);
 
-        Files.writeString(
-            caminhoArquivo,
-            json,
-            StandardCharsets.UTF_8
+        Path arquivoTemporario = Files.createTempFile(
+            pastaDados, 
+            "estoque-", 
+            ".tmp"
         );
+
+        try {
+            Files.writeString(
+                arquivoTemporario,
+                json,
+                StandardCharsets.UTF_8
+            );
+
+            Files.move(
+                arquivoTemporario, 
+                caminhoAbsoluto, 
+                StandardCopyOption.ATOMIC_MOVE,
+                StandardCopyOption.REPLACE_EXISTING
+            );
+        } finally {
+            Files.deleteIfExists(arquivoTemporario);
+        }
     }
 
     public Estoque carregarEstoque(Path caminhoArquivo) throws IOException {

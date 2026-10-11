@@ -1,9 +1,5 @@
 package model;
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
+import module java.base;
 
 // Representa uma fatura e coordena seus itens com as movimentações do estoque. //
 public class Fatura {

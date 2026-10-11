@@ -1,7 +1,5 @@
 package ui;
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.Scanner;
+import module java.base;
 
 import model.Estoque;
 import model.Produto;
@@ -63,7 +61,6 @@ public class EstoqueMenu {
     }
 
     private void exibirOpcoes() {
-        System.out.println();
         System.out.println("=== MENU DO ESTOQUE ===");
         System.out.println("1 - Cadastrar produto");
         System.out.println("2 - Listar produtos");

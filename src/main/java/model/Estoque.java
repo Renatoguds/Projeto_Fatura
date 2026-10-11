@@ -1,7 +1,5 @@
 package model;
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
+import module java.base;
 
 // Mantém os produtos cadastrados e coordena as movimentações do estoque. //
 public class Estoque {

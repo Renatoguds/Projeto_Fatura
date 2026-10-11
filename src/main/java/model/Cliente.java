@@ -50,6 +50,17 @@ public class Cliente {
 
     // Métodos de acesso //
 
+    public Cliente criarCopia() {
+        return new Cliente(
+            razaoSocial,
+            cnpj.toString(),
+            inscricaoEstadual,
+            endereco,
+            email,
+            celular
+        );
+    }
+
     public String getRazaoSocial() {
         return razaoSocial;
     }
@@ -138,5 +149,9 @@ public class Cliente {
 
         this.email = normalizarCampoOpcional(email);
         this.celular = normalizarCampoOpcional(celular);
+    }
+
+    public boolean mesmoCnpj(Cliente cliente) {
+        return this.cnpj.equals(cliente.getCnpj());
     }
 }
